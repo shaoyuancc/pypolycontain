@@ -20,20 +20,18 @@ except:
 
 # Pydrake
 try:
-    import pydrake.solvers.mathematicalprogram as MP
-    import pydrake.solvers.gurobi as Gurobi_drake
-    import pydrake.solvers.osqp as OSQP_drake
+    from pydrake.all import (MathematicalProgram, Solve, GurobiSolver, OsqpSolver)
     # use Gurobi solver
     global gurobi_solver,OSQP_solver, license
-    gurobi_solver=Gurobi_drake.GurobiSolver()
+    gurobi_solver=GurobiSolver()
     license = gurobi_solver.AcquireLicense()
-    OSQP_solver=OSQP_drake.OsqpSolver()
+    OSQP_solver=OsqpSolver()
 except:
     warnings.warn("You don't have pydrake installed properly. Methods that rely on optimization may fail.")
 
 try:
-    import pydrake.solvers.scs as scs_drake
-    scs_solver=scs_drake.ScsSolver()
+    from pydrake.all import (ScsSolver)
+    scs_solver=ScsSolver()
 except:
     warnings.warn("You don't have pydrake with SCS solver.")
     
@@ -112,7 +110,7 @@ def AH_to_V(P,N=360,epsilon=1e-3,solver="Gurobi"):
     if Q.n!=2:
         raise ValueError("Sorry, but I can only do AH to V operation in 2D using ray shooting")
     v=np.empty((N,2))
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     zeta=prog.NewContinuousVariables(Q.P.H.shape[1],1,"zeta")
     prog.AddLinearConstraint(A=Q.P.H,ub=Q.P.h,lb=-np.inf*np.ones((Q.P.h.shape[0],1)),vars=zeta)
     theta=1
@@ -204,7 +202,7 @@ def AH_to_H_old(Q,P0,solver="Gurobi"):
         raise NotImplementedError
     def find_lambda(P):
         # First solve for Lambda
-        program=MP.MathematicalProgram()
+        program=MathematicalProgram()
         eps=program.NewContinuousVariables(1,"epsilon")
         Ball=pp.hyperbox(N=P.n).H_polytope
         Ball.h=Ball.h*eps

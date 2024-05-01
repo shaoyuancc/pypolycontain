@@ -20,16 +20,13 @@ except:
 
 # Pydrake
 try:
-    import pydrake.solvers.mathematicalprogram as MP
-    import pydrake.solvers.gurobi as Gurobi_drake
-    import pydrake.solvers.osqp as OSQP_drake
+    from pydrake.all import (MathematicalProgram, Solve, GurobiSolver, OsqpSolver, ScsSolver)
     # use Gurobi solver
     global gurobi_solver,OSQP_solver, license
-    gurobi_solver=Gurobi_drake.GurobiSolver()
+    gurobi_solver=GurobiSolver()
     license = gurobi_solver.AcquireLicense()
-    OSQP_solver=OSQP_drake.OsqpSolver()
-    import pydrake.solvers.scs as SCS
-    scs_solver=SCS.ScsSolver()
+    OSQP_solver=OsqpSolver()
+    scs_solver=ScsSolver()
 except:
     warnings.warn("You don't have pydrake installed properly. Methods that rely on optimization may fail.")
     
@@ -46,7 +43,7 @@ def ray_shooting_hyperplanes_older(Q,N=0,H_rays=None):
     """
     Ray Shooting to find an outer-approximation of the AH-polytope
     """
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     Q=pp.to_AH_polytope(Q)
 
     if type(H_rays)==type(None):
@@ -73,7 +70,7 @@ def ray_shooting_hyperplanes_old(Q,N=0,H_y=None):
     """
     Ray Shooting to find an outer-approximation of the AH-polytope
     """
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     Q=pp.to_AH_polytope(Q)
     if type(H_y)==type(None):
         if N==0:
@@ -106,7 +103,7 @@ def ray_shooting_hyperplanes(Q,N=0,H_y=None,tol=1e-2):
     """
     Ray Shooting to find an outer-approximation of the AH-polytope
     """
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     Q=pp.to_AH_polytope(Q)
     if type(H_y)==type(None):
         if N==0:
@@ -144,7 +141,7 @@ def _check_if_new_hyperplane_is_redundant(P,new_H,new_h,tol=1e-2):
     P: H_polytope
     """
     assert P.type=='H_polytope'
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     q,n=P.H.shape
     if q==0:
         return False
@@ -176,7 +173,7 @@ def inner_optimization(Q,X=None,N=100,k=-1,method="alternate",iterations=5,tol=1
         assert X.type=='H_polytope'
     # Program
     n=Q.n
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     # T=prog.NewSymmetricContinuousVariables(Q.n,'T')
     T=prog.NewContinuousVariables(n,n,"T")
     t=prog.NewContinuousVariables(n,1,"t")
@@ -211,7 +208,7 @@ def outer_optimization(Q,X=None,N=100,k=-1):
         assert X.type=='H_polytope'
     # Program
     n=Q.n
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
 #    T=prog.NewSymmetricContinuousVariables(Q.n,'T')
     T=prog.NewContinuousVariables(n,n,"T")
     t=prog.NewContinuousVariables(n,1,"t")
@@ -249,7 +246,7 @@ def inner_optimization_new(Q,X=None,N=100,k=-1):
         assert X.type=='H_polytope'
     # Program
     n=Q.n
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     # T=prog.NewSymmetricContinuousVariables(Q.n,'T')
     T=prog.NewContinuousVariables(n,n,"T")
     t=prog.NewContinuousVariables(n,1,"t")

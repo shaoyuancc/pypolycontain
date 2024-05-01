@@ -27,13 +27,12 @@ except:
 #    warnings.warn("You don't have pypolycontain not properly installed.")
 
 try:
-    import pydrake.solvers.mathematicalprogram as MP
-    import pydrake.solvers.gurobi as Gurobi_drake
-    # import pydrake.solvers.osqp as OSQP_drake
+    from pydrake.all import (MathematicalProgram, Solve, GurobiSolver, OsqpSolver)
     # use Gurobi solver
     global gurobi_solver,OSQP_solver, license
-    gurobi_solver=Gurobi_drake.GurobiSolver()
+    gurobi_solver=GurobiSolver()
     license = gurobi_solver.AcquireLicense()
+    OSQP_solver=OsqpSolver()
 except:
     warnings.warn("You don't have pydrake installed properly. Methods that rely on optimization may fail.")
         
@@ -401,7 +400,7 @@ def necessity_gap_k(X,Y,plot=True,only_final=False):
 def alpha(X,Y,Theta):
     X2=pp.to_AH_polytope(X)
     Y2=pp.to_AH_polytope(Y)
-    prog=MP.MathematicalProgram()
+    prog=MathematicalProgram()
     alpha=prog.NewContinuousVariables(1,"alpha")
     t=prog.NewContinuousVariables(X2.n,1,"t")
     Y2.P.h=Y2.P.h*alpha
