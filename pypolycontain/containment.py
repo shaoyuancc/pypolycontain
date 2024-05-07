@@ -163,13 +163,24 @@ def subset(program,inbody,circumbody,k=-1,Theta=None,i=0,alpha=None,verbose=Fals
     Lambda=program.NewContinuousVariables(Theta.shape[1],qx,'Lambda')
     Gamma=program.NewContinuousVariables(ny,nx,'Gamma')
     gamma=program.NewContinuousVariables(ny,1,'gamma')
-    # Constraints
-    program.AddBoundingBoxConstraint(0,np.inf,Lambda) # Lambda Non-Negative
-    program.AddLinearConstraint(np.equal(X,np.dot(Y,Gamma),dtype='object').flatten()) #X=YGamma
-    program.AddLinearConstraint(np.equal(ybar-xbar,np.dot(Y,gamma),dtype='object').flatten()) 
-    program.AddLinearConstraint(np.equal(np.dot(Lambda,Hx),np.dot(Theta.T,np.dot(Hy,Gamma)),dtype='object').flatten()) 
-    program.AddLinearConstraint(np.less_equal(np.dot(Lambda,hx),\
-          np.dot(Theta.T,hy)+np.dot(Theta.T,np.dot(Hy,gamma)),dtype='object').flatten())
+    # Constraints (Original)
+    # program.AddBoundingBoxConstraint(0,np.inf,Lambda) # Lambda Non-Negative
+    # program.AddLinearConstraint(np.equal(X,np.dot(Y,Gamma),dtype='object').flatten()) #X=YGamma
+    # program.AddLinearConstraint(np.equal(ybar-xbar,np.dot(Y,gamma),dtype='object').flatten()) 
+    # program.AddLinearConstraint(np.equal(np.dot(Lambda,Hx),np.dot(Theta.T,np.dot(Hy,Gamma)),dtype='object').flatten()) 
+    # program.AddLinearConstraint(np.less_equal(np.dot(Lambda,hx),\
+    #       np.dot(Theta.T,hy)+np.dot(Theta.T,np.dot(Hy,gamma)),dtype='object').flatten())
+    
+    # Constraints (Rewritten)
+    program.AddBoundingBoxConstraint(0,np.inf,Lambda)
+    program.AddLinearEqualityConstraint(np.kron(Y, np.eye(nx)), X.flatten(), Gamma.flatten())
+    program.AddLinearEqualityConstraint(Y, (ybar - xbar).flatten(), gamma)
+    ThetaHy = Theta.T @ Hy
+    for i in range(Lambda.shape[0]):
+        for j in range(Hx.shape[1]):
+            program.AddLinearEqualityConstraint(np.hstack((Hx[:,j], -ThetaHy[i])), 0, np.hstack((Lambda[i], Gamma[:, j])))
+        program.AddLinearConstraint(np.hstack((hx.flatten(), - ThetaHy[i])), -np.inf, np.dot(Theta[:, i], hy), np.hstack((Lambda[i], gamma.flatten())))
+
     return Theta,Lambda,Gamma,gamma
     
     
